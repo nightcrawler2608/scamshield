@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamShield Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="container">
+      <a class="logo" href="/"><i data-pixel="planet" data-size="38"></i>
+        <span><b>SCAMSHIELD</b><small>CYBER SAFETY</small></span></a>
+      <nav class="nav">
+        <a href="/">CHECK</a>
+        <a href="/#how">HOW</a>
+        <a href="/dashboard" class="active">STATS</a>
+        <a href="/docs">API</a>
+        <a href="tel:1930" class="btn-outline">CALL 1930</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dash container">
+    <h1 class="title" style="font-size: clamp(28px, 5vw, 48px)"><span class="o">LIVE</span><span class="t">STATS.</span></h1>
+
+    <section class="stats">
+      <div class="window stat"><div class="titlebar"><span>TOTAL.DAT</span></div>
+        <div class="win-body"><i data-pixel="search" data-size="44"></i><div><span id="total" class="num">--</span><span class="lbl">checks run</span></div></div></div>
+      <div class="window stat"><div class="titlebar orange"><span>SCAMS.DAT</span></div>
+        <div class="win-body"><i data-pixel="warning" data-size="44"></i><div><span id="scam" class="num scam">--</span><span class="lbl">scams caught</span></div></div></div>
+      <div class="window stat"><div class="titlebar"><span>SUSPECT.DAT</span></div>
+        <div class="win-body"><i data-pixel="search" data-size="44"></i><div><span id="susp" class="num suspicious">--</span><span class="lbl">suspicious</span></div></div></div>
+      <div class="window stat"><div class="titlebar teal"><span>SAFE.DAT</span></div>
+        <div class="win-body"><i data-pixel="shield" data-size="44"></i><div><span id="safe" class="num safe">--</span><span class="lbl">looked safe</span></div></div></div>
+      <div class="window stat"><div class="titlebar"><span>FEEDBACK.DAT</span></div>
+        <div class="win-body"><i data-pixel="bubble" data-size="44"></i><div><span id="fb" class="num">--</span><span class="lbl">feedback votes</span></div></div></div>
+      <div class="window stat"><div class="titlebar teal"><span>ACCURACY.DAT</span></div>
+        <div class="win-body"><i data-pixel="chart" data-size="44"></i><div><span id="acc" class="num">--</span><span class="lbl">correct (user votes)</span></div></div></div>
+    </section>
+
+    <section class="dash-grid">
+      <div class="window bars"><div class="titlebar"><span>TOP SCAM SIGNALS</span><span class="ctrls"><i>_</i><i>×</i></span></div>
+        <div class="win-body"><ol id="reasons"><li>No data yet. Run a few scans!</li></ol></div></div>
+      <div class="window"><div class="titlebar teal"><span>MODELS.SYS</span><span class="ctrls"><i>_</i><i>×</i></span></div>
+        <div class="win-body table-wrap">
+          <table><thead><tr><th>MODEL</th><th>VERSION</th><th>PREC</th><th>RECALL</th><th>F1</th><th>AUC</th></tr></thead>
+            <tbody id="models"></tbody></table>
+          <p style="font-size:18px;margin:12px 0 0">Scores from a held-out 20% test set.</p>
+        </div></div>
+    </section>
+  </main>
+
+  <div class="copyright">© 2026 SCAMSHIELD • MADE WITH <span class="heart">♥</span> AND PIXELS</div>
+
+  <script src="/static/pixel.js"></script>
+  <script>
+    fetch("/api/stats").then((r) => r.json()).then((s) => {
+      const set = (id, v) => (document.getElementById(id).textContent = v);
+      set("total", s.total_checks); set("scam", s.scams_detected); set("susp", s.suspicious);
+      set("safe", s.safe); set("fb", s.feedback_count);
+      set("acc", s.accuracy_from_feedback == null ? "n/a" : Math.round(s.accuracy_from_feedback * 100) + "%");
+
+      const ol = document.getElementById("reasons");
+      if (s.top_reasons.length) {
+        const max = s.top_reasons[0][1];
+        ol.replaceChildren(...s.top_reasons.map(([r, n]) => {
+          const li = document.createElement("li");
+          li.textContent = `${r} (${n})`;
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.width = Math.max(8, (n / max) * 100) + "%";
+          li.appendChild(bar);
+          return li;
+        }));
+      }
+      const tb = document.getElementById("models");
+      Object.entries(s.models).forEach(([name, m]) => {
+        const tr = document.createElement("tr");
+        [name.toUpperCase(), m.version ?? "not trained", m.precision, m.recall, m.f1, m.roc_auc].forEach((v) => {
+          const td = document.createElement("td"); td.textContent = v ?? "–"; tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      });
+    });
+  </script>
+</body>
+</html>

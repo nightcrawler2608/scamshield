@@ -1,0 +1,18 @@
+# Backend + ML training (all free / open source)
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+psycopg2-binary>=2.9      # PostgreSQL driver for Supabase
+pydantic-settings>=2.4
+python-multipart>=0.0.9   # file uploads
+httpx>=0.27
+scikit-learn>=1.5
+xgboost>=2.1
+pandas>=2.2
+numpy>=1.26
+joblib>=1.4
+tldextract>=5.1
+pillow>=10.4
+pytesseract>=0.3.13
+requests>=2.32
+python-dotenv>=1.0

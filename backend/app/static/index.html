@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamShield – Check before you click</title>
+  <meta name="description" content="Free AI tool to check if a message, link or screenshot is a scam.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="container">
+      <a class="logo" href="/"><i data-pixel="planet" data-size="38"></i>
+        <span><b>SCAMSHIELD</b><small>CYBER SAFETY</small></span></a>
+      <nav class="nav">
+        <a href="/" class="active">CHECK</a>
+        <a href="#how">HOW</a>
+        <a href="/dashboard">STATS</a>
+        <a href="/docs">API</a>
+        <a href="tel:1930" class="btn-outline">CALL 1930</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div>
+        <h1 class="title"><span class="o">SCAM?</span><span class="t">SHIELD.</span></h1>
+        <p class="tagline">OLD-SCHOOL CAUTION.<br>NEW-SCHOOL AI.</p>
+        <div class="cta">
+          <a class="btn btn-teal" href="#scan">▶ SCAN A MESSAGE</a>
+          <a class="btn btn-ghost" href="#how">HOW IT WORKS</a>
+        </div>
+        <div class="made"><i data-pixel="lock" data-size="36"></i>
+          <span>FREE. NO SIGN-UP.<br>YOUR PERSONAL DATA IS REMOVED.</span></div>
+      </div>
+      <div class="computer" aria-hidden="true">
+        <div class="burst"></div>
+        <div class="monitor">
+          <div id="screen" class="screen">
+            <div>
+              <i data-pixel="shield" data-size="56"></i>
+              <div class="file">scan.exe</div>
+              <div id="screen-state" class="state">READY <span class="cursor"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="base"></div>
+        <div class="keyboard"></div>
+        <div class="res-badge">TEXT MODEL<b id="res-f1">-- F1</b>TEST SET</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORANGE STRIP -->
+  <section class="strip">
+    <div class="container">
+      <div class="hello"><i data-pixel="smiley" data-size="52"></i><h2>NAMASTE!</h2></div>
+      <p>Got a weird SMS, link or WhatsApp forward? Check it here before you click.</p>
+      <div class="badges">
+        <div><i data-pixel="chip" data-size="36"></i>OWN AI<br>MODELS</div>
+        <div><i data-pixel="bubble" data-size="36"></i>HINDI +<br>ENGLISH</div>
+        <div><i data-pixel="lock" data-size="36"></i>PRIVACY<br>FIRST</div>
+        <div><i data-pixel="chart" data-size="36"></i>LEARNS FROM<br>FEEDBACK</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCANNER -->
+  <section class="scan-zone" id="scan">
+    <div class="container">
+      <h2 class="section-title"><i data-pixel="search" data-size="30"></i>RUN A SCAN</h2>
+      <div class="scan-grid">
+        <div class="window">
+          <div class="titlebar"><span>SCAN.EXE</span><span class="ctrls"><i>_</i><i>□</i><i>×</i></span></div>
+          <div class="win-body">
+            <div class="tabs" role="tablist">
+              <button class="tab active" data-tab="text" role="tab">MESSAGE</button>
+              <button class="tab" data-tab="url" role="tab">LINK</button>
+              <button class="tab" data-tab="image" role="tab">SCREENSHOT</button>
+            </div>
+
+            <form id="form-text" class="panel active">
+              <label for="text" class="hidden">Message</label>
+              <textarea id="text" class="term" rows="6" maxlength="5000" required
+                placeholder="C:\> paste the SMS / WhatsApp / email here_"></textarea>
+              <div class="examples">TRY:
+                <button type="button" class="ex" data-ex="Dear customer your SBI account will be blocked today. Update KYC immediately at http://sbi-kyc-update.xyz/login">KYC scam</button>
+                <button type="button" class="ex" data-ex="Earn Rs 5000 per day by liking YouTube videos. Part time job, join our telegram task group">Job scam</button>
+                <button type="button" class="ex" data-ex="Hi, are we still meeting at 5 pm near the library?">Normal text</button>
+              </div>
+              <button class="btn btn-orange run" type="submit">▶ CHECK MESSAGE</button>
+            </form>
+
+            <form id="form-url" class="panel">
+              <label for="url" class="hidden">Link</label>
+              <input id="url" class="term-input" type="text" maxlength="2048" required placeholder="C:\> https://...">
+              <button class="btn btn-orange run" type="submit">▶ CHECK LINK</button>
+            </form>
+
+            <form id="form-image" class="panel">
+              <label for="image" class="hidden">Screenshot</label>
+              <input id="image" class="term-input" type="file" accept="image/png,image/jpeg,image/webp" required>
+              <button class="btn btn-orange run" type="submit">▶ CHECK SCREENSHOT</button>
+            </form>
+            <p class="privacy"><i data-pixel="lock" data-size="22"></i>Phone numbers, emails, OTPs and account numbers are removed before saving.</p>
+          </div>
+        </div>
+
+        <div class="window result" aria-live="polite">
+          <div class="titlebar teal"><span>RESULT.TXT</span><span class="ctrls"><i>_</i><i>□</i><i>×</i></span></div>
+          <div class="win-body">
+            <div id="error" class="error-box hidden"></div>
+            <div id="empty" class="result-empty">
+              <i data-pixel="shield" data-size="72"></i>
+              <p>Paste something on the left and press <b>CHECK</b>.<br>Your result appears here.</p>
+            </div>
+            <div id="loading" class="loading hidden">SCANNING<span class="cursor"></span></div>
+            <div id="result" class="hidden">
+              <div id="badge" class="verdict"></div>
+              <div id="meter" class="meter"></div>
+              <div id="score-text" class="score"></div>
+              <p id="explanation" class="explanation"></p>
+              <h3>WHY?</h3>
+              <ul id="reasons"></ul>
+              <div id="links-block" class="hidden"><h3>LINKS FOUND</h3><ul id="links"></ul></div>
+              <h3>WHAT TO DO</h3>
+              <ul id="advice"></ul>
+              <details id="ocr-block" class="hidden"><summary>Text read from screenshot</summary><pre id="ocr"></pre></details>
+              <div class="feedback">
+                <span>WAS THIS RIGHT?</span>
+                <button class="fb" data-ok="true">YES</button>
+                <button class="fb" data-ok="false">NO</button>
+                <span id="fb-thanks" class="hidden">Thanks! The AI learns from this.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="container">
+      <h2 class="section-title"><i data-pixel="chip" data-size="30"></i>HOW IT WORKS</h2>
+      <div class="cards4">
+        <div class="window card4"><div class="titlebar"><span>1. PASTE</span><span class="ctrls"><i>□</i></span></div>
+          <div class="win-body"><i data-pixel="search" data-size="64"></i><p>Send a message, link or screenshot. OCR reads text from images.</p></div></div>
+        <div class="window card4"><div class="titlebar"><span>2. ANALYZE</span><span class="ctrls"><i>□</i></span></div>
+          <div class="win-body"><i data-pixel="chip" data-size="64"></i><p>Our trained ML models + 14 scam rules score the risk.</p></div></div>
+        <div class="window card4"><div class="titlebar"><span>3. EXPLAIN</span><span class="ctrls"><i>□</i></span></div>
+          <div class="win-body"><i data-pixel="bubble" data-size="64"></i><p>You get simple reasons and what to do next, in English or Hindi.</p></div></div>
+        <div class="window card4"><div class="titlebar"><span>4. LEARN</span><span class="ctrls"><i>□</i></span></div>
+          <div class="win-body"><i data-pixel="chart" data-size="64"></i><p>Your YES/NO feedback retrains the model over time.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAM GALLERY -->
+  <section class="gallery">
+    <div class="container gallery-grid">
+      <div class="window">
+        <div class="titlebar"><span>COMMON SCAMS – CLICK TO TEST</span><span class="ctrls"><i>_</i><i>□</i><i>×</i></span></div>
+        <div class="win-body cases">
+          <button class="case" data-ex="Dear user your electricity connection will be disconnected tonight at 9.30 pm because previous month bill was not updated. Call officer 9123456789 immediately">
+            <div class="art a1">BIJLI<br>BILL ⚡</div>
+            <div class="meta"><b>POWER CUT SCAM</b><small>"Pay now or lights go off"</small></div></button>
+          <button class="case" data-ex="Congratulations! You have won Rs 25,00,000 in KBC lucky draw. Call 9876543210 to claim your prize. Pay processing fee Rs 4999">
+            <div class="art a2">YOU WON<br>₹25 LAKH!</div>
+            <div class="meta"><b>LOTTERY SCAM</b><small>"Pay a fee to get your prize"</small></div></button>
+          <button class="case" data-ex="This is CBI officer. A parcel in your name contains illegal drugs. You are under digital arrest. Do not disconnect the video call and transfer money for verification">
+            <div class="art a3">DIGITAL<br>ARREST!</div>
+            <div class="meta"><b>FAKE POLICE</b><small>"Transfer money or be arrested"</small></div></button>
+        </div>
+      </div>
+      <div>
+        <div class="window links">
+          <div class="titlebar teal"><span>SAFETY LINKS</span></div>
+          <div class="win-body"><ul>
+            <li><i data-pixel="warning" data-size="22"></i><a href="https://cybercrime.gov.in" target="_blank" rel="noopener">cybercrime.gov.in</a></li>
+            <li><i data-pixel="bubble" data-size="22"></i><a href="tel:1930">Helpline 1930</a></li>
+            <li><i data-pixel="chart" data-size="22"></i><a href="/dashboard">Live scam stats</a></li>
+            <li><i data-pixel="chip" data-size="22"></i><a href="/docs">Developer API</a></li>
+          </ul></div>
+        </div>
+        <a class="btn btn-orange side-cta" href="/dashboard">▶ SEE LIVE STATS</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer">
+      <div class="container">
+        <div class="col"><h4>GOT SCAMMED?</h4>
+          <p>Act fast. Call your bank to block the card or UPI, then report it.</p>
+          <span class="helpline">☎ 1930</span></div>
+        <div class="col"><h4>USE IT ON</h4>
+          <ul><li>▸ Web (this page)</li><li>▸ Telegram bot</li><li>▸ Chrome extension</li><li>▸ REST API</li></ul></div>
+        <div class="col"><h4>GOLDEN RULES</h4>
+          <ul><li>▸ Never share OTP / PIN / CVV</li><li>▸ No one pays you via a collect request</li><li>▸ Police never "arrest" on video call</li></ul></div>
+        <div class="mascot"><div class="say">STAY SAFE!</div><i data-pixel="shield" data-size="80"></i></div>
+      </div>
+    </div>
+    <div class="copyright">© 2026 SCAMSHIELD • AN ASSISTANT, NOT A GUARANTEE • MADE WITH <span class="heart">♥</span> AND PIXELS</div>
+  </footer>
+
+  <script src="/static/pixel.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

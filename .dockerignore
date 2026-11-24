@@ -1,0 +1,9 @@
+.venv
+.git
+ml/data/raw
+**/__pycache__
+*.db
+.env
+extension
+bot
+tests

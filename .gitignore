@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.db
+ml/data/raw/
+ml/data/feedback_export.csv
+ml/runs/
+models/text_transformer/
+.pytest_cache/
+.claude/settings.local.json
