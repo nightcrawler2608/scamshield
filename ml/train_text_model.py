@@ -27,11 +27,22 @@ from sklearn.pipeline import FeatureUnion, Pipeline
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.core.features import normalize_text  # noqa: E402  (shared with the backend)
+from app.core.privacy import fill_placeholders  # noqa: E402
 
 DATA = ROOT / "ml" / "data"
 MODELS = ROOT / "models"
 MODELS.mkdir(exist_ok=True)
 SEED_WEIGHT = 3.0  # hand-written Indian scam examples are rare, so give them more weight
+WEIGHTED = ["seed", "real"]  # Indian-context sources that get SEED_WEIGHT
+
+
+def load_real(path: Path) -> pd.DataFrame:
+    """Redacted collected messages -> model input. [PHONE] etc. become dummy values like the real
+    thing, so the model sees the same kind of text it will see live (no training-serving skew)."""
+    r = pd.read_csv(path, dtype=str, keep_default_na=False)
+    r["text"] = r["text"].map(fill_placeholders)
+    r["label"] = (r["label"] == "scam").astype(int)
+    return r
 
 
 def load_data() -> pd.DataFrame:
@@ -49,9 +60,16 @@ def load_data() -> pd.DataFrame:
     seed["source"] = "seed"
 
     frames = [sms, seed]
+    real = DATA / "real_train.csv"  # optional: Phase 2 collected messages (ml/prepare_real_data.py)
+    if real.exists():
+        r = load_real(real)
+        r["source"] = "real"
+        frames.append(r[["text", "label", "source"]])
+        print(f"Including {len(r)} real collected messages")
     fb = DATA / "feedback_export.csv"  # optional: produced by ml/export_feedback.py
     if fb.exists():
         f = pd.read_csv(fb)
+        f["text"] = f["text"].map(fill_placeholders)  # stored text is redacted
         f["source"] = "feedback"
         frames.append(f)
         print(f"Including {len(f)} rows of user feedback")
@@ -78,7 +96,7 @@ def main() -> None:
     print(df.groupby("source").label.agg(["count", "mean"]))
 
     train, test = train_test_split(df, test_size=0.2, random_state=42, stratify=df["label"])
-    weights = np.where(train["source"] == "seed", SEED_WEIGHT, 1.0)
+    weights = np.where(train["source"].isin(WEIGHTED), SEED_WEIGHT, 1.0)
 
     pipe = build_pipeline()
     pipe.fit(train["text"], train["label"], clf__sample_weight=weights)
@@ -99,6 +117,15 @@ def main() -> None:
     if len(seed_test) and seed_test.label.nunique() == 2:
         sp = pipe.predict(seed_test["text"])
         metrics["seed_subset_f1"] = round(f1_score(seed_test.label, sp), 4)
+    real_test_path = DATA / "real_test.csv"  # Phase 2 held-out set: never in df, never trained on
+    if real_test_path.exists():
+        rt = load_real(real_test_path)
+        if len(rt) and rt.label.nunique() == 2:
+            rp = pipe.predict(rt["text"])
+            metrics["real_test"] = {"n": int(len(rt)),
+                                    "precision": round(precision_score(rt.label, rp), 4),
+                                    "recall": round(recall_score(rt.label, rp), 4),
+                                    "f1": round(f1_score(rt.label, rp), 4)}
 
     print(classification_report(test.label, pred, target_names=["safe", "scam"], digits=4))
     print(json.dumps(metrics, indent=2))
@@ -106,7 +133,7 @@ def main() -> None:
     # Retrain on ALL data for the final model we ship (metrics above are from the held-out split).
     final = build_pipeline()
     final.fit(df["text"], df["label"],
-              clf__sample_weight=np.where(df["source"] == "seed", SEED_WEIGHT, 1.0))
+              clf__sample_weight=np.where(df["source"].isin(WEIGHTED), SEED_WEIGHT, 1.0))
 
     version = "text-" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
     joblib.dump({"pipeline": final, "version": version, "metrics": metrics},

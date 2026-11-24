@@ -1,0 +1,4 @@
+text,label,kind,language,source,notes
+"Dear customer, your SBI account will be blocked today. Update KYC at http://sbi-kyc.xyz/login",scam,kyc,en,family,"forwarded by uncle, SMS"
+"Bhai kal 6 baje metro station pe milte hai",safe,personal,hinglish,own,
+"आपका बिजली कनेक्शन आज रात काट दिया जाएगा, तुरंत कॉल करें [PHONE]",scam,electricity,hi,friend,WhatsApp

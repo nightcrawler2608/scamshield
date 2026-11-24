@@ -9,3 +9,7 @@ ml/runs/
 models/text_transformer/
 .pytest_cache/
 .claude/settings.local.json
+# Phase 2: raw collected messages may contain personal data - never commit them.
+# Only the redacted outputs (ml/data/real_train.csv, real_test.csv) are committed.
+ml/data/collect/*.csv
+!ml/data/collect/TEMPLATE.csv

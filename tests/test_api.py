@@ -33,6 +33,13 @@ def test_redact_removes_personal_data():
         assert secret not in out
 
 
+def test_redact_keeps_spacing_and_placeholders_refill():
+    from app.core.privacy import fill_placeholders
+    out = redact("my aadhaar 1234 5678 9012 is attached, call 9876543210 now")
+    assert out == "my aadhaar [NUMBER] is attached, call [PHONE] now"
+    assert fill_placeholders(out) == "my aadhaar 000000000000 is attached, call 9000000000 now"
+
+
 def test_extract_urls():
     urls = extract_urls("visit http://sbi-kyc.xyz/login or bit.ly/abc now")
     assert "http://sbi-kyc.xyz/login" in urls
