@@ -40,7 +40,12 @@ def load_data() -> pd.DataFrame:
     sms["label"] = (sms["label"] == "spam").astype(int)
     sms["source"] = "uci_sms"
 
-    seed = pd.read_csv(DATA / "seed_messages.csv")
+    # The UCI "spam" class is mostly company/promotional SMS and its "ham" class is personal chat,
+    # so on its own the model learns "sounds like a company = scam" and flags real bank alerts,
+    # OTPs and delivery updates. seed_service_messages.csv adds genuine service SMS (label 0)
+    # next to company-style scams (label 1) so the model must learn what the message ASKS for.
+    seed = pd.concat([pd.read_csv(DATA / "seed_messages.csv"),
+                      pd.read_csv(DATA / "seed_service_messages.csv")], ignore_index=True)
     seed["source"] = "seed"
 
     frames = [sms, seed]

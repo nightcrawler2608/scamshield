@@ -3,10 +3,23 @@ from __future__ import annotations
 
 import io
 import logging
+import os
+import shutil
 
 from PIL import Image, ImageOps
 
 log = logging.getLogger("scamshield.ocr")
+
+# Windows installers usually don't add Tesseract to PATH, so also look in the default folders.
+WINDOWS_PATHS = (r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+                 r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe")
+
+
+def _find_tesseract() -> str | None:
+    found = os.getenv("TESSERACT_CMD") or shutil.which("tesseract")
+    if found:
+        return found
+    return next((p for p in WINDOWS_PATHS if os.path.exists(p)), None)
 
 
 class OCRUnavailable(RuntimeError):
@@ -16,6 +29,9 @@ class OCRUnavailable(RuntimeError):
 def image_to_text(data: bytes) -> str:
     try:
         import pytesseract
+        cmd = _find_tesseract()
+        if cmd:
+            pytesseract.pytesseract.tesseract_cmd = cmd
         pytesseract.get_tesseract_version()
     except Exception as exc:
         raise OCRUnavailable("Tesseract OCR is not installed on this server.") from exc

@@ -49,7 +49,57 @@ def test_rules_hinglish():
     assert {"otp_request", "urgency"} <= ids
 
 
+def test_rules_hindi_script():
+    cases = {
+        "आपका बैंक खाता आज बंद हो जाएगा। तुरंत KYC अपडेट करें और OTP बताएं।":
+            {"account_block", "kyc_update", "urgency", "otp_request"},
+        "बधाई हो! आपने 25 लाख की लॉटरी जीती है। प्रोसेसिंग फीस 4999 जमा करें।": {"prize_lottery", "advance_fee"},
+        "मैं सीबीआई अधिकारी हूं। आपके नाम पर मनी लॉन्ड्रिंग केस है, आप डिजिटल अरेस्ट में हैं।": {"authority_threat"},
+        "घर बैठे रोज़ 5000 कमाएं, बस वीडियो लाइक करें। पार्ट टाइम जॉब": {"job_task_scam"},
+        "आपका बिजली कनेक्शन आज रात काट दिया जाएगा, तुरंत कॉल करें 9123456789": {"account_block", "urgency", "call_unknown_number"},
+    }
+    for text, expected in cases.items():
+        ids = {r.id for r in match_rules(text)}
+        assert expected <= ids, (text, ids)
+
+
+def test_rule_edge_cases():
+    ids = lambda t: {r.id for r in match_rules(t)}  # noqa: E731
+    # genuine bank safety warnings must not trigger the OTP rule...
+    assert "otp_request" not in ids("Never share your OTP, PIN or password with anyone. -SBI")
+    assert "otp_request" not in ids("OTP किसी के साथ शेयर न करें। - SBI")
+    # ...but a scam hiding behind a warning still does
+    assert "otp_request" in ids("Do not share this with anyone but share the OTP with our executive")
+    # toll-free numbers are not "unknown personal numbers"
+    assert "call_unknown_number" not in ids("Not you? Call 18002586161 - HDFC Bank")
+    assert "call_unknown_number" in ids("Call 9876501234 immediately")
+    # threats must be aimed at the reader
+    assert "account_block" not in ids("Yaar mera Paytm account block ho gaya, kal bank jaunga")
+    assert "account_block" in ids("Aapka Paytm account block ho jayega")
+    # new scam type: money 'sent by mistake'
+    assert "mistaken_payment" in ids("Maine galti se aapke account me 5000 bhej diye, wapas bhej do")
+
+
+def test_hindi_normal_messages_no_rules():
+    for text in ["कल शाम 5 बजे लाइब्रेरी के पास मिलते हैं।",
+                 "माँ, मैं घर पहुँच गया हूँ। खाना खा लिया।",
+                 "जन्मदिन की बहुत बहुत शुभकामनाएं!"]:
+        assert match_rules(text) == [], text
+
+
 # ---------- API tests ----------
+def test_hindi_scam_detected(client):
+    r = client.post("/api/analyze/text", json={
+        "text": "आपका बैंक खाता आज बंद हो जाएगा। तुरंत KYC अपडेट करें और OTP बताएं।", "channel": "web"}).json()
+    assert r["verdict"] == "scam"
+    assert r["language"] == "hi"
+
+
+def test_hindi_normal_message_safe(client):
+    r = client.post("/api/analyze/text", json={"text": "कल शाम 5 बजे लाइब्रेरी के पास मिलते हैं।", "channel": "web"}).json()
+    assert r["verdict"] == "safe"
+
+
 def test_health(client):
     assert client.get("/api/health").json()["status"] == "ok"
 

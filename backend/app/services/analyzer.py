@@ -65,6 +65,9 @@ def check_urls(urls: list[str]) -> list[UrlCheck]:
     return out
 
 
+MIN_VOCAB_COVERAGE = 0.5  # below this share of known words, the text model is not fully trusted
+
+
 def fuse(text_score: float | None, url_score: float | None, rule_weights: list[float]) -> float:
     base = max([s for s in (text_score, url_score) if s is not None], default=0.0)
     keep = 1.0
@@ -90,9 +93,15 @@ async def analyze(text: str, only_url: bool = False) -> Result:
     url_score = max((u.score for u in url_checks), default=None)
 
     text_score = None if only_url else registry.predict_text(text)
+    if text_score is not None:
+        # If the model knows fewer than half the words, scale its score down so a guess
+        # (e.g. a Hindi sentence where only a number is familiar) can't decide the verdict alone.
+        coverage = registry.text_coverage(text)
+        if coverage < MIN_VOCAB_COVERAGE:
+            text_score *= coverage / MIN_VOCAB_COVERAGE
     rules = [] if only_url else match_rules(text)
 
-    risk = fuse(text_score, url_score, [r.weight for r in rules])
+    risk = round(fuse(text_score, url_score, [r.weight for r in rules]), 4)  # one rounded value everywhere
     verdict = verdict_for(risk)
 
     reasons: list[str] = [r.reason for r in sorted(rules, key=lambda r: -r.weight)]

@@ -64,6 +64,20 @@ class ModelRegistry:
             return None
         return float(self.text.predict_proba([text])[0, 1])
 
+    def text_coverage(self, text: str) -> float:
+        """Share of the message's words that the text model saw during training (0-1).
+
+        An English-trained model shown a Hindi sentence knows almost none of its words, so its
+        score rests on one or two clues (e.g. a number) and is not trustworthy. Low coverage = low trust.
+        """
+        if self.transformer is not None or self.text is None:
+            return 1.0  # the multilingual transformer handles Hindi itself
+        word_vec = self.text.named_steps["features"].transformer_list[0][1]
+        tokens = [t for t in word_vec.build_analyzer()(text) if " " not in t]  # single words only
+        if not tokens:
+            return 1.0
+        return sum(t in word_vec.vocabulary_ for t in tokens) / len(tokens)
+
     def predict_urls(self, urls: list[str]) -> list[float] | None:
         """Returns one phishing probability per URL, or None if no URL model is trained."""
         if self.url is None:

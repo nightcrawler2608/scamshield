@@ -124,7 +124,7 @@ git commit -am "retrain model" ; git push   # Space redeploys with the new model
 ## 📊 Current results (held-out 20% test set)
 | Model | Precision | Recall | F1 | ROC-AUC |
 |---|---|---|---|---|
-| Text: TF-IDF + Logistic Regression | 0.978 | 0.950 | 0.964 | 0.998 |
+| Text: TF-IDF + Logistic Regression | 0.979 | 0.965 | 0.972 | 0.998 |
 | URL: XGBoost (32 features, bias-corrected) | 0.935 | 0.814 | 0.870 | 0.923 |
 
 Exact numbers are in `models/*_metrics.json` and change slightly with each training run.
